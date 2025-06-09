@@ -1,3 +1,4 @@
+package ConsoleOOTicTacToe;
 // Define named constants to represent the various states of the game
 public static final int PLAYING    = 0;
 public static final int DRAW       = 1;
