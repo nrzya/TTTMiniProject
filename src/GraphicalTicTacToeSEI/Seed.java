@@ -11,6 +11,7 @@ import javax.swing.ImageIcon;
  * We also attach a display image icon (text or image) for the items.
  *   and define the related variable/constructor/getter.
  * To draw the image:
+ *
  *   g.drawImage(content.getImage(), x, y, width, height, null);
  *
  * Ideally, we should define two enums with inheritance, which is,
