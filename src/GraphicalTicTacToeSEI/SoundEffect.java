@@ -21,7 +21,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
  */
 public enum SoundEffect {
     CLICK("audio/click.wav"),
-    WIN("audio/WIN.wav"),
+    WIN("audio/win.wav"),
     SERI("audio/seri.wav");
 
 
