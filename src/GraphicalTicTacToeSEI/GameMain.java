@@ -140,7 +140,7 @@ public class GameMain extends JPanel {
 
     /** The entry "main" method */
     public static void main(String[] args) throws ClassNotFoundException {
-        SwingUtilities.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> { //login
             boolean loginPassed = showLoginDialog();
             if (loginPassed) {
                 JFrame frame = new JFrame(TITLE);
