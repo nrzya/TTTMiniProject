@@ -27,9 +27,11 @@ public class TurnTimer {
         timer = new Timer(1000, new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 timeLeft--;
-                statusLabel.setText("Sisa waktu: " + timeLeft + " detik");
-                if (timeLeft <= 3) playTickSound();
-                if (timeLeft <= 0) {
+                if (timeLeft > 0) {
+                    statusLabel.setText("Giliran " + (statusLabel.getText().contains("X") ? "X" : "O") +
+                            " | Sisa waktu: " + timeLeft + " detik");
+                    if (timeLeft <= 3) playTickSound();
+                } else {
                     stop();
                     onTimeout.run(); // waktu habis -> kalah
                 }
@@ -46,7 +48,7 @@ public class TurnTimer {
 
     private void playTickSound() {
         try {
-            URL url = getClass().getResource("/audio/tick.wav");
+            URL url = getClass().getClassLoader().getResource("audio/tick.wav");
             if (url != null) {
                 Clip clip = AudioSystem.getClip();
                 AudioInputStream audioIn = AudioSystem.getAudioInputStream(url);

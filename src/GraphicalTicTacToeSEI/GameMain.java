@@ -1,73 +1,65 @@
 package GraphicalTicTacToeSEI;
-import java.sql.*;
-import java.util.Scanner;
+
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
-/**
- * Tic-Tac-Toe: Two-player Graphic version with better OO design.
- * The Board and Cell classes are separated in their own classes.
- */
-public class GameMain extends JPanel {
-    private static final long serialVersionUID = 1L; // to prevent serializable warning
+import java.sql.*;
 
-    // Define named constants for the drawing graphics
+public class GameMain extends JPanel {
+    private static final long serialVersionUID = 1L;
+
     public static final String TITLE = "Tic Tac Toe";
     public static final Color COLOR_BG = Color.WHITE;
     public static final Color COLOR_BG_STATUS = new Color(216, 216, 216);
-    public static final Color COLOR_CROSS = new Color(239, 105, 80);  // Red #EF6950
-    public static final Color COLOR_NOUGHT = new Color(64, 154, 225); // Blue #409AE1
     public static final Font FONT_STATUS = new Font("OCR A Extended", Font.PLAIN, 14);
 
-    // Define game objects
-    private Board board;         // the game board
-    private State currentState;  // the current state of the game
-    private Seed currentPlayer;  // the current player
-    private JLabel statusBar;    // for displaying status message
+    private Board board;
+    private State currentState;
+    private Seed currentPlayer;
+    private JLabel statusBar;
+
     private TurnTimer turnTimer;
     private final int MAX_TURN_TIME = 5; // detik per giliran
 
-
-    /** Constructor to setup the UI and game components */
     public GameMain() {
-
-        // This JPanel fires MouseEvent
         super.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {  // mouse-clicked handler
-                int mouseX = e.getX();
-                int mouseY = e.getY();
-                // Get the row and column clicked
-                int row = mouseY / Cell.SIZE;
-                int col = mouseX / Cell.SIZE;
+            public void mouseClicked(MouseEvent e) {
+                int row = e.getY() / Cell.SIZE;
+                int col = e.getX() / Cell.SIZE;
 
                 if (currentState == State.PLAYING) {
-                    if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS
-                            && board.cells[row][col].content == Seed.NO_SEED) {
-                        // Update cells[][] and return the new game state after the move
+                    if (row >= 0 && row < Board.ROWS && col >= 0 && col < Board.COLS &&
+                            board.cells[row][col].content == Seed.NO_SEED) {
+
                         currentState = board.stepGame(currentPlayer, row, col);
-                        // Switch player
-                        currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+
+                        if (currentState == State.PLAYING) {
+                            currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
+                            SoundEffect.CLICK.play();
+                            startPlayerTimer();
+                        } else {
+                            stopTimerIfRunning();
+                            if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
+                                SoundEffect.WIN.play();
+                            } else {
+                                SoundEffect.SERI.play();
+                            }
+                        }
+
+                    } else {
+                        statusBar.setText("Kotak sudah terisi. Pilih kotak kosong!");
                     }
+
+                } else {
+                    newGame();
                     startPlayerTimer();
-                    if (currentState == State.PLAYING) {
-                        SoundEffect.CLICK.play();
-                    } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON){
-                        SoundEffect.WIN.play();
-                    }
-                    else {
-                        SoundEffect.SERI.play();
-                    }
-                } else {        // game over
-                    newGame();  // restart the game
                 }
-                startPlayerTimer();
-                // Refresh the drawing canvas
-                repaint();  // Callback paintComponent().
+
+                repaint();
             }
         });
 
-        // Setup the status bar (JLabel) to display status message
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
         statusBar.setBackground(COLOR_BG_STATUS);
@@ -76,69 +68,64 @@ public class GameMain extends JPanel {
         statusBar.setHorizontalAlignment(JLabel.LEFT);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
-        super.setLayout(new BorderLayout());
-        super.add(statusBar, BorderLayout.PAGE_END); // same as SOUTH
-        super.setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
-        // account for statusBar in height
-        super.setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2, false));
+        setLayout(new BorderLayout());
+        add(statusBar, BorderLayout.PAGE_END);
+        setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
+        setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2));
 
-        // Set up Game
         initGame();
         newGame();
     }
+
+    private void initGame() {
+        board = new Board();
+    }
+
+    public void newGame() {
+        board.newGame();
+        currentPlayer = Seed.CROSS;
+        currentState = State.PLAYING;
+        startPlayerTimer();
+    }
+
     private void startPlayerTimer() {
-        if (turnTimer != null) {
-            turnTimer.stop();
-        }
+        stopTimerIfRunning();
         turnTimer = new TurnTimer(MAX_TURN_TIME, statusBar, () -> {
-            statusBar.setText("Waktu habis! " + (currentPlayer == Seed.CROSS ? "O" : "X") + " menang!");
             currentState = (currentPlayer == Seed.CROSS) ? State.NOUGHT_WON : State.CROSS_WON;
+            statusBar.setText("Waktu habis! " + (currentPlayer == Seed.CROSS ? "O" : "X") + " menang!");
+            SoundEffect.WIN.play();
             repaint();
         });
         turnTimer.start();
     }
 
-    /** Initialize the game (run once) */
-    public void initGame() {
-        board = new Board();  // allocate the game-board
-    }
-
-    /** Reset the game-board contents and the current-state, ready for new game */
-    public void newGame() {
-        for (int row = 0; row < Board.ROWS; ++row) {
-            for (int col = 0; col < Board.COLS; ++col) {
-                board.cells[row][col].content = Seed.NO_SEED; // all cells empty
-            }
+    private void stopTimerIfRunning() {
+        if (turnTimer != null) {
+            turnTimer.stop();
         }
-        currentPlayer = Seed.CROSS;    // cross plays first
-        currentState = State.PLAYING;  // ready to play
     }
 
-    /** Custom painting codes on this JPanel */
     @Override
-    public void paintComponent(Graphics g) {  // Callback via repaint()
+    public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        setBackground(COLOR_BG); // set its background color
+        setBackground(COLOR_BG);
+        board.paint(g);
 
-        board.paint(g);  // ask the game board to paint itself
-
-        // Print status-bar message
         if (currentState == State.PLAYING) {
             statusBar.setForeground(Color.BLACK);
-            statusBar.setText((currentPlayer == Seed.CROSS) ? "X's Turn" : "O's Turn");
+            statusBar.setText((currentPlayer == Seed.CROSS ? "Giliran X" : "Giliran O"));
         } else if (currentState == State.DRAW) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("It's a Draw! Click to play again.");
+            statusBar.setText("Hasil seri! Klik untuk main lagi.");
         } else if (currentState == State.CROSS_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'X' Won! Click to play again.");
+            statusBar.setText("X menang! Klik untuk main lagi.");
         } else if (currentState == State.NOUGHT_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("'O' Won! Click to play again.");
+            statusBar.setText("O menang! Klik untuk main lagi.");
         }
     }
 
-    /** The entry "main" method */
     public static void main(String[] args) throws ClassNotFoundException {
         SwingUtilities.invokeLater(() -> {
             boolean loginPassed = showLoginDialog();
@@ -182,12 +169,12 @@ public class GameMain extends JPanel {
                     if (password.equals(truePassword)) {
                         loginSuccess = true;
                     } else {
-                        messageLabel.setText("Invalid login. Try again.");
+                        messageLabel.setText("Login gagal. Coba lagi.");
                         usernameField.setText("");
                         passwordField.setText("");
                     }
                 } catch (ClassNotFoundException e) {
-                    JOptionPane.showMessageDialog(null, "Database error.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Koneksi database gagal.", "Error", JOptionPane.ERROR_MESSAGE);
                     e.printStackTrace();
                     break;
                 }
@@ -199,35 +186,28 @@ public class GameMain extends JPanel {
         return loginSuccess;
     }
 
-    static String getPassword (String uName) throws ClassNotFoundException{
-        String host, port, databaseName, userName, password;
-        host = port = databaseName = userName = password = null;
+    static String getPassword(String uName) throws ClassNotFoundException {
+        String host = "mysql-156473cc-tictactoeproject.f.aivencloud.com";
+        String userName = "avnadmin";
+        String password = "AVNS_eLPau0fYxH3P0wSTUQG";
+        String databaseName = "tictactoedb";
+        String port = "16206";
 
-        host = "mysql-156473cc-tictactoeproject.f.aivencloud.com";
-        userName = "avnadmin";
-        password = "AVNS_eLPau0fYxH3P0wSTUQG";
-        databaseName = "tictactoedb";
-        port = "16206";
-
-
-        // JDBC allows to have nullable username and password
-        if (host == null || port == null || databaseName == null) {
-            System.out.println("Host, port, database information is required");
-
-        }
         Class.forName("com.mysql.cj.jdbc.Driver");
         String userPassword = "";
-        try (final Connection connection =
-                     DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require", userName, password);
-             final Statement statement = connection.createStatement();
-             final ResultSet resultSet = statement.executeQuery("SELECT password from game_user where username = '" + uName + "'")) {
 
+        try (Connection connection =
+                     DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + databaseName + "?sslmode=require", userName, password);
+             Statement statement = connection.createStatement();
+             ResultSet resultSet = statement.executeQuery("SELECT password FROM game_user WHERE username = '" + uName + "'")) {
             while (resultSet.next()) {
                 userPassword = resultSet.getString("password");
             }
         } catch (SQLException e) {
-            System.out.println("Connection failure.");
+            System.out.println("Database error.");
             e.printStackTrace();
-        } return userPassword;
+        }
+
+        return userPassword;
     }
 }
