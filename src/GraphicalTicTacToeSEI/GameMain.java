@@ -140,34 +140,65 @@ public class GameMain extends JPanel {
 
     /** The entry "main" method */
     public static void main(String[] args) throws ClassNotFoundException {
-        Scanner read = new Scanner(System.in);
-        boolean falsePassword = true;
-        do {
-            System.out.println("Enter your username:");
-            String username = read.nextLine();
-            System.out.println("Enter your password:");
-            String password = read.nextLine();
-            String truePassword = getPassword(username);
-            if (password.equals(truePassword)){
-                falsePassword = false;
-            }
-            else{
-                System.out.print("Wrong password please try again");
-            }
-        } while (falsePassword);
-        // Run GUI construction codes in Event-Dispatching thread for thread safety
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
+        SwingUtilities.invokeLater(() -> {
+            boolean loginPassed = showLoginDialog();
+            if (loginPassed) {
                 JFrame frame = new JFrame(TITLE);
-                // Set the content-pane of the JFrame to an instance of main JPanel
                 frame.setContentPane(new GameMain());
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.pack();
-                frame.setLocationRelativeTo(null); // center the application window
-                frame.setVisible(true);            // show it
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+            } else {
+                System.exit(0);
             }
         });
     }
+
+    private static boolean showLoginDialog() {
+        JPanel panel = new JPanel(new GridLayout(3, 2));
+        JTextField usernameField = new JTextField(10);
+        JPasswordField passwordField = new JPasswordField(10);
+        JLabel messageLabel = new JLabel("");
+
+        panel.add(new JLabel("Username:"));
+        panel.add(usernameField);
+        panel.add(new JLabel("Password:"));
+        panel.add(passwordField);
+        panel.add(messageLabel);
+
+        int result;
+        boolean loginSuccess = false;
+
+        do {
+            result = JOptionPane.showConfirmDialog(
+                    null, panel, "Login", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+
+            if (result == JOptionPane.OK_OPTION) {
+                String username = usernameField.getText();
+                String password = new String(passwordField.getPassword());
+                try {
+                    String truePassword = getPassword(username);
+                    if (password.equals(truePassword)) {
+                        loginSuccess = true;
+                    } else {
+                        messageLabel.setText("Invalid login. Try again.");
+                        usernameField.setText("");
+                        passwordField.setText("");
+                    }
+                } catch (ClassNotFoundException e) {
+                    JOptionPane.showMessageDialog(null, "Database error.", "Error", JOptionPane.ERROR_MESSAGE);
+                    e.printStackTrace();
+                    break;
+                }
+            } else {
+                break;
+            }
+        } while (!loginSuccess);
+
+        return loginSuccess;
+    }
+
     static String getPassword (String uName) throws ClassNotFoundException{
         String host, port, databaseName, userName, password;
         host = port = databaseName = userName = password = null;
