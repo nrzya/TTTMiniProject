@@ -24,6 +24,9 @@ public class GameMain extends JPanel {
     private State currentState;  // the current state of the game
     private Seed currentPlayer;  // the current player
     private JLabel statusBar;    // for displaying status message
+    private TurnTimer turnTimer;
+    private final int MAX_TURN_TIME = 5; // detik per giliran
+
 
     /** Constructor to setup the UI and game components */
     public GameMain() {
@@ -46,6 +49,7 @@ public class GameMain extends JPanel {
                         // Switch player
                         currentPlayer = (currentPlayer == Seed.CROSS) ? Seed.NOUGHT : Seed.CROSS;
                     }
+                    startPlayerTimer();
                     if (currentState == State.PLAYING) {
                         SoundEffect.CLICK.play();
                     } else if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON){
@@ -57,6 +61,7 @@ public class GameMain extends JPanel {
                 } else {        // game over
                     newGame();  // restart the game
                 }
+                startPlayerTimer();
                 // Refresh the drawing canvas
                 repaint();  // Callback paintComponent().
             }
@@ -80,6 +85,17 @@ public class GameMain extends JPanel {
         // Set up Game
         initGame();
         newGame();
+    }
+    private void startPlayerTimer() {
+        if (turnTimer != null) {
+            turnTimer.stop();
+        }
+        turnTimer = new TurnTimer(MAX_TURN_TIME, statusBar, () -> {
+            statusBar.setText("Waktu habis! " + (currentPlayer == Seed.CROSS ? "O" : "X") + " menang!");
+            currentState = (currentPlayer == Seed.CROSS) ? State.NOUGHT_WON : State.CROSS_WON;
+            repaint();
+        });
+        turnTimer.start();
     }
 
     /** Initialize the game (run once) */
