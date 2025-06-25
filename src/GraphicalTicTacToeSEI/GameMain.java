@@ -203,7 +203,7 @@ public class GameMain extends JPanel {
         });
     }
 
-    static boolean showLoginDialog() {
+    static boolean showLoginDialog() { //recommit
         JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
         panel.setBackground(new Color(255, 245, 230)); // soft cream
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
