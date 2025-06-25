@@ -28,8 +28,26 @@ public class GameMain extends JPanel {
     // [MODIFIKASI] Tambahkan ScoreBoard dan scoreLabel
     private ScoreBoard scoreBoard;
     private JLabel scoreLabel;
+    private String playerXName = "Player X";
+    private String playerOName = "Player O";
 
     public GameMain() {
+        // Langkah 1: Minta nama pemain
+        askPlayerNames();
+
+// Langkah 2: Inisialisasi scoreboard
+        scoreBoard = new ScoreBoard(playerXName, playerOName);
+        scoreBoard.setPlayerNames(playerXName, playerOName);
+
+// Langkah 3: Buat label setelah nama di-set
+        scoreLabel = new JLabel(scoreBoard.getScoreText());
+        scoreLabel.setFont(FONT_STATUS);
+        scoreLabel.setBackground(COLOR_BG_STATUS);
+        scoreLabel.setOpaque(true);
+        scoreLabel.setPreferredSize(new Dimension(300, 30));
+        scoreLabel.setHorizontalAlignment(JLabel.CENTER);
+        scoreLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
+
         super.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -62,8 +80,8 @@ public class GameMain extends JPanel {
                                 scoreBoard.addScore(currentPlayer);
                                 scoreLabel.setText(scoreBoard.getScoreText());
 
-                                String pemenang = (currentState == State.CROSS_WON) ? "X" : "O";
-                                JOptionPane.showMessageDialog(null, "Selamat " + pemenang + " menang!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
+                                String pemenang = (currentState == State.CROSS_WON) ? playerXName : playerOName;
+                                JOptionPane.showMessageDialog(null, "Congratulations " + pemenang + " wins!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
                             } else {
                                 SoundEffect.SERI.play();
                                 JOptionPane.showMessageDialog(null, "Permainan Seri!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
@@ -84,7 +102,7 @@ public class GameMain extends JPanel {
         });
 
         // [MODIFIKASI] Inisialisasi scoreBoard dan label skor
-        scoreBoard = new ScoreBoard();
+        scoreBoard = new ScoreBoard(playerXName, playerOName);
         scoreLabel = new JLabel(scoreBoard.getScoreText());
         scoreLabel.setFont(FONT_STATUS);
         scoreLabel.setBackground(COLOR_BG_STATUS);
@@ -132,12 +150,38 @@ public class GameMain extends JPanel {
         currentState = State.PLAYING;
         startPlayerTimer();
     }
+    private void askPlayerNames() {
+        JTextField playerXField = new JTextField(); // dikosongkan
+        JTextField playerOField = new JTextField(); // dikosongkan
+
+        JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
+        panel.setBackground(new Color(245, 245, 255));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.add(new JLabel("Nama Player X:"));
+        panel.add(playerXField);
+        panel.add(new JLabel("Nama Player O:"));
+        panel.add(playerOField);
+
+        int result = JOptionPane.showConfirmDialog(
+                null, panel, "Masukkan Nama Pemain", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
+        );
+
+        if (result == JOptionPane.OK_OPTION) {
+            if (!playerXField.getText().trim().isEmpty()) {
+                playerXName = playerXField.getText().trim();
+            }
+            if (!playerOField.getText().trim().isEmpty()) {
+                playerOName = playerOField.getText().trim();
+            }
+        }
+    }
 
     private void startPlayerTimer() {
         stopTimerIfRunning();
         turnTimer = new TurnTimer(MAX_TURN_TIME, statusBar, () -> {
             currentState = (currentPlayer == Seed.CROSS) ? State.NOUGHT_WON : State.CROSS_WON;
-            statusBar.setText("Waktu habis! " + (currentPlayer == Seed.CROSS ? "O" : "X") + " menang!");
+            String pemenang = (currentPlayer == Seed.CROSS) ? playerOName : playerXName;
+            statusBar.setText("Waktu habis! " + pemenang + " menang!");
             SoundEffect.WIN.play();
             repaint();
 
@@ -186,24 +230,24 @@ public class GameMain extends JPanel {
         board.paint(g);
 
         if (currentState == State.PLAYING) {
-            statusBar.setText((currentPlayer == Seed.CROSS ? "X's Turn" : "O's Turn"));
+            statusBar.setText((currentPlayer == Seed.CROSS ? "Giliran " + playerXName : "Giliran " + playerOName));
         } else if (currentState == State.DRAW) {
-            statusBar.setText("It's a draw! Click to play again.");
+            statusBar.setText("Permainan seri! Klik untuk main lagi.");
         } else if (currentState == State.CROSS_WON) {
-            statusBar.setText("Congratulations! X wins! Click to play again.");
+            statusBar.setText("Selamat " + playerXName + " menang! Klik untuk main lagi.");
         } else if (currentState == State.NOUGHT_WON) {
-            statusBar.setText("Congratulations! O wins! Click to play again.");
+            statusBar.setText("Selamat " + playerOName + " menang! Klik untuk main lagi.");
         }
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             BackgroundMusic.playLoop();     // 🔊 Play background music
-            new SplashScreen().setVisible(true);  // 🖼️ Show splash screen
+            new SplashScreen().setVisible(true);  // 🖼 Show splash screen
         });
     }
 
-    static boolean showLoginDialog() {
+    static boolean showLoginDialog() { //recommit
         JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
         panel.setBackground(new Color(255, 245, 230)); // soft cream
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
