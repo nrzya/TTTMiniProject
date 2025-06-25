@@ -28,6 +28,30 @@ public class GameMain extends JPanel {
     // [MODIFIKASI] Tambahkan ScoreBoard dan scoreLabel
     private ScoreBoard scoreBoard;
     private JLabel scoreLabel;
+    // Tambahan untuk nama pemain
+    private String playerXName = "X";
+    private String playerOName = "O";
+    private boolean playerNamesSet = false;
+
+    private void askPlayerNames() {
+        JTextField xField = new JTextField();
+        JTextField oField = new JTextField();
+
+        JPanel panel = new JPanel(new GridLayout(2, 2));
+        panel.add(new JLabel("Nama Pemain X:"));
+        panel.add(xField);
+        panel.add(new JLabel("Nama Pemain O:"));
+        panel.add(oField);
+
+        int result = JOptionPane.showConfirmDialog(null, panel, "Masukkan Nama Pemain", JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            playerXName = xField.getText().trim().isEmpty() ? "X" : xField.getText().trim();
+            playerOName = oField.getText().trim().isEmpty() ? "O" : oField.getText().trim();
+            scoreBoard.addScore(currentPlayer);
+            scoreLabel.setText(getScoreLabelText());
+        }
+    }
 
     public GameMain() {
         super.addMouseListener(new MouseAdapter() {
@@ -60,10 +84,24 @@ public class GameMain extends JPanel {
 
                                 // [MODIFIKASI] Tambahkan skor dan update label skor
                                 scoreBoard.addScore(currentPlayer);
-                                scoreLabel.setText(scoreBoard.getScoreText());
+                                scoreLabel.setText(getScoreLabelText());
 
-                                String pemenang = (currentState == State.CROSS_WON) ? "X" : "O";
-                                JOptionPane.showMessageDialog(null, "Selamat " + pemenang + " menang!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
+                                if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
+                                    SoundEffect.WIN.play();
+
+                                    for (Cell cell : board.getWinningCells()) {
+                                        if (cell != null) {
+                                            cell.setHighlight(true);
+                                        }
+                                    }
+                                    repaint();
+
+                                    scoreBoard.addScore(currentPlayer); // Tambah skor
+                                    scoreLabel.setText(getScoreLabelText()); // Perbarui tampilan skor dengan nama
+
+                                    String pemenangNama = (currentState == State.CROSS_WON) ? playerXName : playerOName;
+                                    JOptionPane.showMessageDialog(null, "Selamat " + pemenangNama + " menang!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
+                                }
                             } else {
                                 SoundEffect.SERI.play();
                                 JOptionPane.showMessageDialog(null, "Permainan Seri!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
@@ -77,6 +115,8 @@ public class GameMain extends JPanel {
                 } else {
                     newGame();
                     startPlayerTimer();
+                    scoreLabel.setText(getScoreLabelText());
+
                 }
 
                 repaint();
@@ -92,6 +132,7 @@ public class GameMain extends JPanel {
         scoreLabel.setPreferredSize(new Dimension(300, 30));
         scoreLabel.setHorizontalAlignment(JLabel.CENTER);
         scoreLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
+        scoreLabel = new JLabel(getScoreLabelText());
 
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
@@ -130,6 +171,10 @@ public class GameMain extends JPanel {
         board.newGame();
         currentPlayer = Seed.CROSS;
         currentState = State.PLAYING;
+        if (!playerNamesSet) {
+            askPlayerNames();              // Hanya dijalankan pertama kali
+            playerNamesSet = true;        // Setelah itu tidak akan muncul lagi
+        }
         startPlayerTimer();
     }
 
@@ -149,24 +194,35 @@ public class GameMain extends JPanel {
         });
         turnTimer.start();
     }
+    private String getScoreLabelText() {
+        return playerXName + " (X): " + scoreBoard.getScore(Seed.CROSS) +
+                " | " + playerOName + " (O): " + scoreBoard.getScore(Seed.NOUGHT);
+    }
+
 
     private void toggleTheme() {
         if (currentTheme == Theme.LIGHT) {
             currentTheme = Theme.DARK;
             setBackground(Color.DARK_GRAY);
+
             statusBar.setBackground(Color.DARK_GRAY);
-            statusBar.setForeground(Color.WHITE);
+            statusBar.setForeground(Color.BLACK); // teks jelas
+
             scoreLabel.setBackground(Color.DARK_GRAY);
-            scoreLabel.setForeground(Color.WHITE);
-            themeButton.setBackground(Color.GRAY);
+            scoreLabel.setForeground(Color.BLACK); // teks jelas
+
+            themeButton.setBackground(new Color(200, 200, 200));
             themeButton.setForeground(Color.WHITE);
         } else {
             currentTheme = Theme.LIGHT;
             setBackground(COLOR_BG);
+
             statusBar.setBackground(COLOR_BG_STATUS);
-            statusBar.setForeground(Color.BLACK);
+            statusBar.setForeground(Color.BLACK); // teks jelas
+
             scoreLabel.setBackground(COLOR_BG_STATUS);
-            scoreLabel.setForeground(Color.BLACK);
+            scoreLabel.setForeground(Color.BLACK); // teks jelas
+
             themeButton.setBackground(Color.LIGHT_GRAY);
             themeButton.setForeground(Color.BLACK);
         }
@@ -198,9 +254,18 @@ public class GameMain extends JPanel {
 
     public static void main(String[] args) throws ClassNotFoundException {
         SwingUtilities.invokeLater(() -> {
-            boolean loginPassed = showLoginDialog();
+            boolean loginPassed = showLoginDialog(); // hanya berlaku di dalam blok ini
+
             if (loginPassed) {
-                new WelcomeScreen(loggedInUser).setVisible(true);
+                GameMain gamePanel = new GameMain();
+                // gamePanel.askPlayerNames(); // ← minta nama pemain
+
+                JFrame frame = new JFrame(TITLE);
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.setContentPane(gamePanel);
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
             } else {
                 System.exit(0);
             }
