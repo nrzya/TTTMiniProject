@@ -19,11 +19,15 @@ public class GameMain extends JPanel {
     private JLabel statusBar;
 
     private TurnTimer turnTimer;
-    private final int MAX_TURN_TIME = 5; // detik per giliran
+    private final int MAX_TURN_TIME = 5;
 
-    public static String loggedInUser = ""; // menyimpan username
+    public static String loggedInUser = "";
     private Theme currentTheme = Theme.LIGHT;
     private JButton themeButton;
+
+    // [MODIFIKASI] Tambahkan ScoreBoard dan scoreLabel
+    private ScoreBoard scoreBoard;
+    private JLabel scoreLabel;
 
     public GameMain() {
         super.addMouseListener(new MouseAdapter() {
@@ -44,18 +48,20 @@ public class GameMain extends JPanel {
                             startPlayerTimer();
                         } else {
                             stopTimerIfRunning();
+
                             if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
                                 SoundEffect.WIN.play();
 
-                                // Tampilkan popup pemenang
+                                // [MODIFIKASI] Tambahkan skor dan update label skor
+                                scoreBoard.addScore(currentPlayer);
+                                scoreLabel.setText(scoreBoard.getScoreText());
+
                                 String pemenang = (currentState == State.CROSS_WON) ? "X" : "O";
                                 JOptionPane.showMessageDialog(null, "Selamat " + pemenang + " menang!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
-
                             } else {
                                 SoundEffect.SERI.play();
                                 JOptionPane.showMessageDialog(null, "Permainan Seri!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
                             }
-
                         }
 
                     } else {
@@ -71,6 +77,16 @@ public class GameMain extends JPanel {
             }
         });
 
+        // [MODIFIKASI] Inisialisasi scoreBoard dan label skor
+        scoreBoard = new ScoreBoard();
+        scoreLabel = new JLabel(scoreBoard.getScoreText());
+        scoreLabel.setFont(FONT_STATUS);
+        scoreLabel.setBackground(COLOR_BG_STATUS);
+        scoreLabel.setOpaque(true);
+        scoreLabel.setPreferredSize(new Dimension(300, 30));
+        scoreLabel.setHorizontalAlignment(JLabel.CENTER);
+        scoreLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
+
         statusBar = new JLabel();
         statusBar.setFont(FONT_STATUS);
         statusBar.setBackground(COLOR_BG_STATUS);
@@ -79,21 +95,25 @@ public class GameMain extends JPanel {
         statusBar.setHorizontalAlignment(JLabel.LEFT);
         statusBar.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 12));
 
-        setLayout(new BorderLayout());
-        add(statusBar, BorderLayout.PAGE_END);
+        // [MODIFIKASI] Panel atas: berisi tombol tema dan skor
+        JPanel topPanel = new JPanel(new BorderLayout());
         themeButton = new JButton("Ganti Tema");
         themeButton.setFocusPainted(false);
         themeButton.setBackground(Color.LIGHT_GRAY);
         themeButton.setFont(FONT_STATUS);
         themeButton.addActionListener(e -> toggleTheme());
-        add(themeButton, BorderLayout.PAGE_START);
+        topPanel.add(themeButton, BorderLayout.WEST);
+        topPanel.add(scoreLabel, BorderLayout.CENTER);
+
+        setLayout(new BorderLayout());
+        add(topPanel, BorderLayout.PAGE_START); // [MODIFIKASI]
+        add(statusBar, BorderLayout.PAGE_END);
 
         setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
         setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2));
 
         initGame();
         newGame();
-
     }
 
     private void initGame() {
@@ -113,16 +133,24 @@ public class GameMain extends JPanel {
             currentState = (currentPlayer == Seed.CROSS) ? State.NOUGHT_WON : State.CROSS_WON;
             statusBar.setText("Waktu habis! " + (currentPlayer == Seed.CROSS ? "O" : "X") + " menang!");
             SoundEffect.WIN.play();
+
+            // [MODIFIKASI] Tambahkan skor karena menang karena waktu habis
+            scoreBoard.addScore(currentPlayer == Seed.CROSS ? Seed.NOUGHT : Seed.CROSS);
+            scoreLabel.setText(scoreBoard.getScoreText());
+
             repaint();
         });
         turnTimer.start();
     }
+
     private void toggleTheme() {
         if (currentTheme == Theme.LIGHT) {
             currentTheme = Theme.DARK;
             setBackground(Color.DARK_GRAY);
             statusBar.setBackground(Color.DARK_GRAY);
             statusBar.setForeground(Color.WHITE);
+            scoreLabel.setBackground(Color.DARK_GRAY);
+            scoreLabel.setForeground(Color.WHITE);
             themeButton.setBackground(Color.GRAY);
             themeButton.setForeground(Color.WHITE);
         } else {
@@ -130,6 +158,8 @@ public class GameMain extends JPanel {
             setBackground(COLOR_BG);
             statusBar.setBackground(COLOR_BG_STATUS);
             statusBar.setForeground(Color.BLACK);
+            scoreLabel.setBackground(COLOR_BG_STATUS);
+            scoreLabel.setForeground(Color.BLACK);
             themeButton.setBackground(Color.LIGHT_GRAY);
             themeButton.setForeground(Color.BLACK);
         }
@@ -145,12 +175,9 @@ public class GameMain extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
-        // Update background sesuai tema
         setBackground(currentTheme == Theme.DARK ? Color.DARK_GRAY : COLOR_BG);
-        board.paint(g);  // tetap pakai board.paint(g)
+        board.paint(g);
 
-        // Tampilkan status
         if (currentState == State.PLAYING) {
             statusBar.setText((currentPlayer == Seed.CROSS ? "Giliran X" : "Giliran O"));
         } else if (currentState == State.DRAW) {
@@ -162,12 +189,11 @@ public class GameMain extends JPanel {
         }
     }
 
-
     public static void main(String[] args) throws ClassNotFoundException {
         SwingUtilities.invokeLater(() -> {
             boolean loginPassed = showLoginDialog();
             if (loginPassed) {
-                new WelcomeScreen(loggedInUser).setVisible(true); // tampilkan welcome screen
+                new WelcomeScreen(loggedInUser).setVisible(true);
             } else {
                 System.exit(0);
             }
@@ -199,7 +225,7 @@ public class GameMain extends JPanel {
                 try {
                     String truePassword = getPassword(username);
                     if (password.equals(truePassword)) {
-                        loggedInUser = username; // simpan username
+                        loggedInUser = username;
                         loginSuccess = true;
                     } else {
                         messageLabel.setText("Login failed. Try again.");
