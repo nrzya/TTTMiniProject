@@ -52,6 +52,12 @@ public class GameMain extends JPanel {
                             if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
                                 SoundEffect.WIN.play();
 
+                                for (Cell cell : board.getWinningCells()) {
+                                    if (cell != null) {
+                                        cell.setHighlight(true);
+                                    }
+                                }
+
                                 // [MODIFIKASI] Tambahkan skor dan update label skor
                                 scoreBoard.addScore(currentPlayer);
                                 scoreLabel.setText(scoreBoard.getScoreText());
@@ -133,6 +139,7 @@ public class GameMain extends JPanel {
             currentState = (currentPlayer == Seed.CROSS) ? State.NOUGHT_WON : State.CROSS_WON;
             statusBar.setText("Waktu habis! " + (currentPlayer == Seed.CROSS ? "O" : "X") + " menang!");
             SoundEffect.WIN.play();
+            repaint();
 
             // [MODIFIKASI] Tambahkan skor karena menang karena waktu habis
             scoreBoard.addScore(currentPlayer == Seed.CROSS ? Seed.NOUGHT : Seed.CROSS);
