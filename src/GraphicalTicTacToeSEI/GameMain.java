@@ -84,12 +84,12 @@ public class GameMain extends JPanel {
                                 JOptionPane.showMessageDialog(null, "Congratulations " + pemenang + " wins!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
                             } else {
                                 SoundEffect.SERI.play();
-                                JOptionPane.showMessageDialog(null, "Permainan Seri!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
+                                JOptionPane.showMessageDialog(null, "Draw Game!", "Game Over", JOptionPane.INFORMATION_MESSAGE);
                             }
                         }
 
                     } else {
-                        statusBar.setText("Kotak sudah terisi. Pilih kotak kosong!");
+                        statusBar.setText("The box is already filled. Select the empty box!");
                     }
 
                 } else {
@@ -121,7 +121,7 @@ public class GameMain extends JPanel {
 
         // [MODIFIKASI] Panel atas: berisi tombol tema dan skor
         JPanel topPanel = new JPanel(new BorderLayout());
-        themeButton = new JButton("Ganti Tema");
+        themeButton = new JButton("Change Theme");
         themeButton.setFocusPainted(false);
         themeButton.setBackground(Color.LIGHT_GRAY);
         themeButton.setFont(FONT_STATUS);
@@ -157,13 +157,13 @@ public class GameMain extends JPanel {
         JPanel panel = new JPanel(new GridLayout(2, 2, 10, 10));
         panel.setBackground(new Color(245, 245, 255));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panel.add(new JLabel("Nama Player X:"));
+        panel.add(new JLabel("Player's Name X:"));
         panel.add(playerXField);
-        panel.add(new JLabel("Nama Player O:"));
+        panel.add(new JLabel("Player's Name O:"));
         panel.add(playerOField);
 
         int result = JOptionPane.showConfirmDialog(
-                null, panel, "Masukkan Nama Pemain", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
+                null, panel, "Enter Player Name", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE
         );
 
         if (result == JOptionPane.OK_OPTION) {
@@ -181,7 +181,7 @@ public class GameMain extends JPanel {
         turnTimer = new TurnTimer(MAX_TURN_TIME, statusBar, () -> {
             currentState = (currentPlayer == Seed.CROSS) ? State.NOUGHT_WON : State.CROSS_WON;
             String pemenang = (currentPlayer == Seed.CROSS) ? playerOName : playerXName;
-            statusBar.setText("Waktu habis! " + pemenang + " menang!");
+            statusBar.setText("Time has run out! " + pemenang + " wins!");
             SoundEffect.WIN.play();
             repaint();
 
@@ -230,13 +230,13 @@ public class GameMain extends JPanel {
         board.paint(g);
 
         if (currentState == State.PLAYING) {
-            statusBar.setText((currentPlayer == Seed.CROSS ? "Giliran " + playerXName : "Giliran " + playerOName));
+            statusBar.setText((currentPlayer == Seed.CROSS ? "Turn " + playerXName : "Turn " + playerOName));
         } else if (currentState == State.DRAW) {
-            statusBar.setText("Permainan seri! Klik untuk main lagi.");
+            statusBar.setText("Draw game! Click to play again.");
         } else if (currentState == State.CROSS_WON) {
-            statusBar.setText("Selamat " + playerXName + " menang! Klik untuk main lagi.");
+            statusBar.setText("Congratulations " + playerXName + " win! Click to play again.");
         } else if (currentState == State.NOUGHT_WON) {
-            statusBar.setText("Selamat " + playerOName + " menang! Klik untuk main lagi.");
+            statusBar.setText("Congratulations " + playerOName + " win! Click to play again.");
         }
     }
 
@@ -263,11 +263,11 @@ public class GameMain extends JPanel {
         JLabel messageLabel = new JLabel("");
         messageLabel.setForeground(Color.RED);
 
-        JLabel userLabel = new JLabel("Nama Pengguna:");
+        JLabel userLabel = new JLabel("Username: ");
         userLabel.setForeground(new Color(80, 40, 40));
         userLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
 
-        JLabel passLabel = new JLabel("Kata Sandi:");
+        JLabel passLabel = new JLabel("Password: ");
         passLabel.setForeground(new Color(80, 40, 40));
         passLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
 
@@ -297,12 +297,12 @@ public class GameMain extends JPanel {
                         loggedInUser = username;
                         loginSuccess = true;
                     } else {
-                        messageLabel.setText("❌ Wrong! Try Again.");
+                        messageLabel.setText("Wrong! Try Again.");
                         usernameField.setText("");
                         passwordField.setText("");
                     }
                 } catch (ClassNotFoundException e) {
-                    JOptionPane.showMessageDialog(null, "Koneksi database gagal.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Database connection failed.", "Error", JOptionPane.ERROR_MESSAGE);
                     break;
                 }
             } else {
