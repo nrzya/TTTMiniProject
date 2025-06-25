@@ -175,7 +175,7 @@ public class GameMain extends JPanel {
                         loggedInUser = username; // simpan username
                         loginSuccess = true;
                     } else {
-                        messageLabel.setText("Login gagal. Coba lagi.");
+                        messageLabel.setText("Login failed. Try again.");
                         usernameField.setText("");
                         passwordField.setText("");
                     }
