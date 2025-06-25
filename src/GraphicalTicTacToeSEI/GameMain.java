@@ -22,6 +22,8 @@ public class GameMain extends JPanel {
     private final int MAX_TURN_TIME = 5; // detik per giliran
 
     public static String loggedInUser = ""; // menyimpan username
+    private Theme currentTheme = Theme.LIGHT;
+    private JButton themeButton;
 
     public GameMain() {
         super.addMouseListener(new MouseAdapter() {
@@ -53,7 +55,7 @@ public class GameMain extends JPanel {
                                 SoundEffect.SERI.play();
                                 JOptionPane.showMessageDialog(null, "Permainan Seri!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
                             }
- 
+
                         }
 
                     } else {
@@ -79,11 +81,19 @@ public class GameMain extends JPanel {
 
         setLayout(new BorderLayout());
         add(statusBar, BorderLayout.PAGE_END);
+        themeButton = new JButton("Ganti Tema");
+        themeButton.setFocusPainted(false);
+        themeButton.setBackground(Color.LIGHT_GRAY);
+        themeButton.setFont(FONT_STATUS);
+        themeButton.addActionListener(e -> toggleTheme());
+        add(themeButton, BorderLayout.PAGE_START);
+
         setPreferredSize(new Dimension(Board.CANVAS_WIDTH, Board.CANVAS_HEIGHT + 30));
         setBorder(BorderFactory.createLineBorder(COLOR_BG_STATUS, 2));
 
         initGame();
         newGame();
+
     }
 
     private void initGame() {
@@ -107,6 +117,24 @@ public class GameMain extends JPanel {
         });
         turnTimer.start();
     }
+    private void toggleTheme() {
+        if (currentTheme == Theme.LIGHT) {
+            currentTheme = Theme.DARK;
+            setBackground(Color.DARK_GRAY);
+            statusBar.setBackground(Color.DARK_GRAY);
+            statusBar.setForeground(Color.WHITE);
+            themeButton.setBackground(Color.GRAY);
+            themeButton.setForeground(Color.WHITE);
+        } else {
+            currentTheme = Theme.LIGHT;
+            setBackground(COLOR_BG);
+            statusBar.setBackground(COLOR_BG_STATUS);
+            statusBar.setForeground(Color.BLACK);
+            themeButton.setBackground(Color.LIGHT_GRAY);
+            themeButton.setForeground(Color.BLACK);
+        }
+        repaint();
+    }
 
     private void stopTimerIfRunning() {
         if (turnTimer != null) {
@@ -117,24 +145,23 @@ public class GameMain extends JPanel {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        setBackground(COLOR_BG);
-        board.paint(g);
 
+        // Update background sesuai tema
+        setBackground(currentTheme == Theme.DARK ? Color.DARK_GRAY : COLOR_BG);
+        board.paint(g);  // tetap pakai board.paint(g)
+
+        // Tampilkan status
         if (currentState == State.PLAYING) {
-            statusBar.setForeground(Color.BLACK);
             statusBar.setText((currentPlayer == Seed.CROSS ? "Giliran X" : "Giliran O"));
         } else if (currentState == State.DRAW) {
-            statusBar.setForeground(Color.RED);
             statusBar.setText("Hasil seri! Klik untuk main lagi.");
         } else if (currentState == State.CROSS_WON) {
-            statusBar.setForeground(Color.RED);
             statusBar.setText("Selamat X menang! Klik untuk main lagi.");
         } else if (currentState == State.NOUGHT_WON) {
-            statusBar.setForeground(Color.RED);
             statusBar.setText("Selamat O menang! Klik untuk main lagi.");
         }
-
     }
+
 
     public static void main(String[] args) throws ClassNotFoundException {
         SwingUtilities.invokeLater(() -> {
