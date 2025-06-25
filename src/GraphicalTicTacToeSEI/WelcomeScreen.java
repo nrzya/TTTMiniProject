@@ -6,7 +6,7 @@ import java.awt.*;
 public class WelcomeScreen extends JFrame {
 
     public WelcomeScreen(String username) {
-        setTitle("Welcome");
+        setTitle("WOOHOOO YOU START THE GAME!");
         setSize(350, 150);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
