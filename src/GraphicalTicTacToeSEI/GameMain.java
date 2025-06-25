@@ -186,45 +186,63 @@ public class GameMain extends JPanel {
         board.paint(g);
 
         if (currentState == State.PLAYING) {
-            statusBar.setText((currentPlayer == Seed.CROSS ? "Giliran X" : "Giliran O"));
+            statusBar.setText((currentPlayer == Seed.CROSS ? "X's Turn" : "O's Turn"));
         } else if (currentState == State.DRAW) {
-            statusBar.setText("Hasil seri! Klik untuk main lagi.");
+            statusBar.setText("It's a draw! Click to play again.");
         } else if (currentState == State.CROSS_WON) {
-            statusBar.setText("Selamat X menang! Klik untuk main lagi.");
+            statusBar.setText("Congratulations! X wins! Click to play again.");
         } else if (currentState == State.NOUGHT_WON) {
-            statusBar.setText("Selamat O menang! Klik untuk main lagi.");
+            statusBar.setText("Congratulations! O wins! Click to play again.");
         }
     }
 
-    public static void main(String[] args) throws ClassNotFoundException {
+    public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            boolean loginPassed = showLoginDialog();
-            if (loginPassed) {
-                new WelcomeScreen(loggedInUser).setVisible(true);
-            } else {
-                System.exit(0);
-            }
+            BackgroundMusic.playLoop();     // 🔊 Play background music
+            new SplashScreen().setVisible(true);  // 🖼️ Show splash screen
         });
     }
 
-    private static boolean showLoginDialog() {
-        JPanel panel = new JPanel(new GridLayout(3, 2));
-        JTextField usernameField = new JTextField(10);
-        JPasswordField passwordField = new JPasswordField(10);
-        JLabel messageLabel = new JLabel("");
+    static boolean showLoginDialog() {
+        JPanel panel = new JPanel(new GridLayout(3, 2, 10, 10));
+        panel.setBackground(new Color(255, 245, 230)); // soft cream
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        panel.add(new JLabel("Username:"));
+        JTextField usernameField = new JTextField(10);
+        usernameField.setBackground(Color.WHITE);
+        usernameField.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
+
+        JPasswordField passwordField = new JPasswordField(10);
+        passwordField.setBackground(Color.WHITE);
+        passwordField.setFont(new Font("Comic Sans MS", Font.PLAIN, 14));
+
+        JLabel messageLabel = new JLabel("");
+        messageLabel.setForeground(Color.RED);
+
+        JLabel userLabel = new JLabel("Nama Pengguna:");
+        userLabel.setForeground(new Color(80, 40, 40));
+        userLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
+
+        JLabel passLabel = new JLabel("Kata Sandi:");
+        passLabel.setForeground(new Color(80, 40, 40));
+        passLabel.setFont(new Font("Comic Sans MS", Font.BOLD, 14));
+
+        panel.add(userLabel);
         panel.add(usernameField);
-        panel.add(new JLabel("Password:"));
+        panel.add(passLabel);
         panel.add(passwordField);
         panel.add(messageLabel);
+        panel.add(new JLabel());
 
         int result;
         boolean loginSuccess = false;
 
         do {
             result = JOptionPane.showConfirmDialog(
-                    null, panel, "Login", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                    null, panel, "Let's Play TicTactoe🦕",
+                    JOptionPane.OK_CANCEL_OPTION,
+                    JOptionPane.PLAIN_MESSAGE
+            );
 
             if (result == JOptionPane.OK_OPTION) {
                 String username = usernameField.getText();
@@ -235,13 +253,12 @@ public class GameMain extends JPanel {
                         loggedInUser = username;
                         loginSuccess = true;
                     } else {
-                        messageLabel.setText("Login failed. Try again.");
+                        messageLabel.setText("❌ Wrong! Try Again.");
                         usernameField.setText("");
                         passwordField.setText("");
                     }
                 } catch (ClassNotFoundException e) {
                     JOptionPane.showMessageDialog(null, "Koneksi database gagal.", "Error", JOptionPane.ERROR_MESSAGE);
-                    e.printStackTrace();
                     break;
                 }
             } else {

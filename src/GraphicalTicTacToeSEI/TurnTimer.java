@@ -28,8 +28,8 @@ public class TurnTimer {
             public void actionPerformed(ActionEvent e) {
                 timeLeft--;
                 if (timeLeft > 0) {
-                    statusLabel.setText("Giliran " + (statusLabel.getText().contains("X") ? "X" : "O") +
-                            " | Sisa waktu: " + timeLeft + " detik");
+                    statusLabel.setText("Turn: " + (statusLabel.getText().contains("X") ? "X" : "O") +
+                            " | Time left: " + timeLeft + " seconds");
                     if (timeLeft <= 3) playTickSound();
                 } else {
                     stop();

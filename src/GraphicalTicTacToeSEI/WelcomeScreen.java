@@ -11,7 +11,7 @@ public class WelcomeScreen extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        JLabel welcomeLabel = new JLabel("Selamat datang, " + username + "!", JLabel.CENTER);
+        JLabel welcomeLabel = new JLabel("Welcome, " + username + "!", JLabel.CENTER);
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
         add(welcomeLabel);
 
