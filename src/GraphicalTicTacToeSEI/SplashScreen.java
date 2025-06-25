@@ -6,7 +6,7 @@ import java.net.URL;
 
 public class SplashScreen extends JFrame {
 
-    public SplashScreen() {
+    public SplashScreen() { //recommit
         setTitle("Tic Tac Toe 🦕");
         setSize(960, 600);
         setLocationRelativeTo(null);
