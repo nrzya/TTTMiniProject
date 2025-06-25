@@ -1,17 +1,23 @@
 package GraphicalTicTacToeSEI;
 
 /**
- * Kelas ScoreBoard untuk mencatat skor pemain.
+ * Kelas ScoreBoard untuk mencatat skor pemain berdasarkan nama.
  */
 public class ScoreBoard {
     private int scoreCross;
     private int scoreNought;
+    private String playerXName;
+    private String playerOName;
 
-    public ScoreBoard() {
+    // Constructor dengan nama pemain
+    public ScoreBoard(String playerXName, String playerOName) {
+        this.playerXName = playerXName;
+        this.playerOName = playerOName;
         this.scoreCross = 0;
         this.scoreNought = 0;
     }
 
+    // Menambahkan skor untuk pemain yang menang
     public void addScore(Seed winner) {
         if (winner == Seed.CROSS) {
             scoreCross++;
@@ -20,16 +26,25 @@ public class ScoreBoard {
         }
     }
 
+    // Mengambil skor sesuai pemain
     public int getScore(Seed player) {
         return (player == Seed.CROSS) ? scoreCross : scoreNought;
     }
 
+    // Mengembalikan teks skor dengan nama pemain
     public String getScoreText() {
-        return "Score - X: " + scoreCross + " | O: " + scoreNought;
+        return playerXName + ": " + scoreCross + "  |  " + playerOName + ": " + scoreNought;
     }
 
+    // Reset semua skor
     public void resetScores() {
         scoreCross = 0;
         scoreNought = 0;
+    }
+
+    // (Opsional) Jika kamu mau ubah nama setelah inisialisasi
+    public void setPlayerNames(String playerXName, String playerOName) {
+        this.playerXName = playerXName;
+        this.playerOName = playerOName;
     }
 }
