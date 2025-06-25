@@ -21,6 +21,8 @@ public class GameMain extends JPanel {
     private TurnTimer turnTimer;
     private final int MAX_TURN_TIME = 5; // detik per giliran
 
+    public static String loggedInUser = ""; // menyimpan username
+
     public GameMain() {
         super.addMouseListener(new MouseAdapter() {
             @Override
@@ -42,9 +44,16 @@ public class GameMain extends JPanel {
                             stopTimerIfRunning();
                             if (currentState == State.CROSS_WON || currentState == State.NOUGHT_WON) {
                                 SoundEffect.WIN.play();
+
+                                // Tampilkan popup pemenang
+                                String pemenang = (currentState == State.CROSS_WON) ? "X" : "O";
+                                JOptionPane.showMessageDialog(null, "Selamat " + pemenang + " menang!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
+
                             } else {
                                 SoundEffect.SERI.play();
+                                JOptionPane.showMessageDialog(null, "Permainan Seri!", "Game Selesai", JOptionPane.INFORMATION_MESSAGE);
                             }
+ 
                         }
 
                     } else {
@@ -119,23 +128,19 @@ public class GameMain extends JPanel {
             statusBar.setText("Hasil seri! Klik untuk main lagi.");
         } else if (currentState == State.CROSS_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("X menang! Klik untuk main lagi.");
+            statusBar.setText("Selamat X menang! Klik untuk main lagi.");
         } else if (currentState == State.NOUGHT_WON) {
             statusBar.setForeground(Color.RED);
-            statusBar.setText("O menang! Klik untuk main lagi.");
+            statusBar.setText("Selamat O menang! Klik untuk main lagi.");
         }
+
     }
 
     public static void main(String[] args) throws ClassNotFoundException {
-        SwingUtilities.invokeLater(() -> { //login
+        SwingUtilities.invokeLater(() -> {
             boolean loginPassed = showLoginDialog();
             if (loginPassed) {
-                JFrame frame = new JFrame(TITLE);
-                frame.setContentPane(new GameMain());
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.pack();
-                frame.setLocationRelativeTo(null);
-                frame.setVisible(true);
+                new WelcomeScreen(loggedInUser).setVisible(true); // tampilkan welcome screen
             } else {
                 System.exit(0);
             }
@@ -167,6 +172,7 @@ public class GameMain extends JPanel {
                 try {
                     String truePassword = getPassword(username);
                     if (password.equals(truePassword)) {
+                        loggedInUser = username; // simpan username
                         loginSuccess = true;
                     } else {
                         messageLabel.setText("Login gagal. Coba lagi.");
