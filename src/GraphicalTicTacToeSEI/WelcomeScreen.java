@@ -26,7 +26,7 @@ public class WelcomeScreen extends JFrame {
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
         });
-        timer.setRepeats(false); // <--- INI YANG PENTING
+        timer.setRepeats(false);
         timer.start();
     }
 }

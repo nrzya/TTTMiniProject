@@ -1,8 +1,7 @@
 package GraphicalTicTacToeSEI;
 
-/**
- * Kelas ScoreBoard untuk mencatat skor pemain berdasarkan nama.
- */
+
+
 public class ScoreBoard {
     private int scoreCross;
     private int scoreNought;
@@ -42,7 +41,7 @@ public class ScoreBoard {
         scoreNought = 0;
     }
 
-    // (Opsional) Jika kamu mau ubah nama setelah inisialisasi
+
     public void setPlayerNames(String playerXName, String playerOName) {
         this.playerXName = playerXName;
         this.playerOName = playerOName;
