@@ -101,7 +101,7 @@ public class GameMain extends JPanel {
             }
         });
 
-        // [MODIFIKASI] Inisialisasi scoreBoard dan label skor
+
         scoreBoard = new ScoreBoard(playerXName, playerOName);
         scoreLabel = new JLabel(scoreBoard.getScoreText());
         scoreLabel.setFont(FONT_STATUS);
